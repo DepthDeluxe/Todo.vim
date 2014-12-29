@@ -8,7 +8,7 @@
 "        Version: 0.1
 "-------------------------------
 " Load script only once
-if exists("g:loaded_todo") || &cp
+if exists("g:loaded_todo")
   finish
 endif
 let g:loaded_todo = 1
@@ -23,7 +23,7 @@ function s:OpenWindow()
   " write text to the window and close
   call delete("/tmp/todo.tmp")
   sp /tmp/todo.tmp
-  put "a
+  put a
   write
   close
 
