@@ -14,8 +14,18 @@ if exists("g:loaded_todo")
 endif
 let g:loaded_todo = 1
 
+
 " initialization
-command! Todo call s:Todo()
+let s:matches = []
+
+" define commands
+command Todo call s:Todo()
+command TodoOpen call s:TodoOpen()
+
+" bind autocmds
+autocmd BufEnter /tmp/todo.tmp map <F2> TodoOpen
+autocmd BufLeave /tmp/todo.tmp unmap <F2>
+
 " --------------
 
 " Plugin main
@@ -24,6 +34,8 @@ function s:Todo()
   " match upper case and lower case text
   let l:matches = []
   g/\v([t|T][o|O][d|D][o|O]|[x|X]{3}|[f|F][i|I][x|X][m|M][e|E]):/let l:matches = matches + [[line("."), getline(line("."))]]
+
+  let s:matches = l:matches
 
   call s:WriteToFile(@%, l:matches)
   call s:OpenWindow()
@@ -38,10 +50,6 @@ function s:OpenWindow()
   new
   view /tmp/todo.tmp
   set nomodifiable
-
-  " bind the enter key
-  " map <Enter> GoToTodo
-  map <F2> :echo 'Current time is '.strftime('%c')<CR>
 endfunction
 
 function s:WriteToFile(origname, matches)
@@ -49,6 +57,7 @@ function s:WriteToFile(origname, matches)
   sp /tmp/todo.tmp
 
   " write the filename
+  set modifiable
   put =a:origname
   put ='--------'
   put =''
@@ -66,3 +75,18 @@ function s:WriteToFile(origname, matches)
   close
 endfunction
 
+function s:TodoOpen()
+  " get array index, return if out of bounds
+  let l:arraypos = line(".") - 4
+  if l:arraypos < 0 && l:arraypos >= len(s:matches)
+    return
+  endif
+
+  " store the match
+  let l:match = s:matches[l:arraypos]
+
+  " switch window up and go to that line
+  wincmd k
+  execute l:match[0]
+
+endfunction
