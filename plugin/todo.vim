@@ -14,15 +14,18 @@ if exists("g:loaded_todo")
 endif
 let g:loaded_todo = 1
 
-
 " initialization
 let s:matches = []
+
+let s:Todo_open = 0
+let s:Todo_mini_size = 7
 
 " define commands
 command Todo call s:Todo()
 command TodoOpen call s:TodoOpen()
 
 " define shortcut
+" XXX: move to dotfiles
 nnoremap <Leader>t :Todo<CR>
 
 " bind autocmds
@@ -32,10 +35,21 @@ autocmd BufLeave /tmp/todo.tmp unmap <Enter>
 autocmd BufEnter /tmp/todo.tmp set cursorline
 autocmd BufLeave /tmp/todo.tmp set nocursorline
 
+autocmd BufEnter /tmp/todo.tmp execute 'resize ' . s:Todo_mini_size*3
+autocmd BufLeave /tmp/todo.tmp execute 'resize ' . s:Todo_mini_size
+
+autocmd BufWinEnter /tmp/todo.tmp let s:Todo_open = 1
+autocmd BufWinLeave /tmp/todo.tmp let s:Todo_open = 0
+
 " --------------
 
 " Plugin main
 function s:Todo()
+  " Close the window if its already open
+  if s:Todo_open
+    call s:CloseWindow()
+    return
+  endif
 
   " match upper case and lower case text
   let l:matches = []
@@ -77,6 +91,11 @@ function s:WriteToFile(origname, matches)
   0delete
 
   write
+  close
+endfunction
+
+function s:CloseWindow()
+  view /tmp/todo.tmp
   close
 endfunction
 
