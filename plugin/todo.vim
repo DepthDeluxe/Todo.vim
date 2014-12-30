@@ -31,10 +31,6 @@ command TodoBufWinEnter call s:TodoBufWinEnter()
 command TodoBufWinLeave call s:TodoBufWinLeave()
 command TodoCursorMoved call s:TodoCursorMoved()
 
-" define shortcut
-" XXX: move to dotfiles
-nnoremap <Leader>t :Todo<CR>
-
 " bind autocmds
 autocmd BufEnter /tmp/todo.tmp TodoBufEnter
 autocmd BufLeave /tmp/todo.tmp TodoBufLeave
