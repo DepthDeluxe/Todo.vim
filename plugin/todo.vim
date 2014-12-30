@@ -22,9 +22,12 @@ let s:matches = []
 command Todo call s:Todo()
 command TodoOpen call s:TodoOpen()
 
+" define shortcut
+nnoremap <Leader>t :Todo<CR>
+
 " bind autocmds
-autocmd BufEnter /tmp/todo.tmp nnoremap <F2> :TodoOpen<Enter>
-autocmd BufLeave /tmp/todo.tmp unmap <F2>
+autocmd BufEnter /tmp/todo.tmp nnoremap <Enter> :TodoOpen<CR>
+autocmd BufLeave /tmp/todo.tmp unmap <Enter>
 
 autocmd BufEnter /tmp/todo.tmp set cursorline
 autocmd BufLeave /tmp/todo.tmp set nocursorline
@@ -46,7 +49,6 @@ function s:Todo()
 endfunction
 
 " Opens a window with the file in read only mode
-" Todo: Enter binding to open the file
 function s:OpenWindow()
   " open the file in readonly mode with
   " editing turned off
@@ -55,7 +57,6 @@ function s:OpenWindow()
   set nomodifiable
 endfunction
 
-" TODO: something else
 function s:WriteToFile(origname, matches)
   call delete("/tmp/todo.tmp")
   sp /tmp/todo.tmp
