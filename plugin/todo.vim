@@ -6,7 +6,7 @@
 "
 "         Author: Colin Heinzmann (cheinzmann3@gmail.com)
 "        Version: 0.1
-"-------------------------------
+"------------------------------
 
 " Load script only once
 if exists("g:loaded_todo")
@@ -23,8 +23,11 @@ command Todo call s:Todo()
 command TodoOpen call s:TodoOpen()
 
 " bind autocmds
-autocmd BufEnter /tmp/todo.tmp map <F2> TodoOpen
+autocmd BufEnter /tmp/todo.tmp nnoremap <F2> :TodoOpen<Enter>
 autocmd BufLeave /tmp/todo.tmp unmap <F2>
+
+autocmd BufEnter /tmp/todo.tmp set cursorline
+autocmd BufLeave /tmp/todo.tmp set nocursorline
 
 " --------------
 
@@ -52,6 +55,7 @@ function s:OpenWindow()
   set nomodifiable
 endfunction
 
+" TODO: something else
 function s:WriteToFile(origname, matches)
   call delete("/tmp/todo.tmp")
   sp /tmp/todo.tmp
@@ -90,3 +94,4 @@ function s:TodoOpen()
   execute l:match[0]
 
 endfunction
+
