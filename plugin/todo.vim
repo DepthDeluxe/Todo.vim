@@ -22,25 +22,27 @@ let s:Todo_mini_size = 7
 
 " define commands
 command Todo call s:Todo()
+
+" internal commands
 command TodoOpen call s:TodoOpen()
+command TodoBufEnter call s:TodoBufEnter()
+command TodoBufLeave call s:TodoBufLeave()
+command TodoBufWinEnter call s:TodoBufWinEnter()
+command TodoBufWinLeave call s:TodoBufWinLeave()
+command TodoCursorMoved call s:TodoCursorMoved()
 
 " define shortcut
 " XXX: move to dotfiles
 nnoremap <Leader>t :Todo<CR>
 
 " bind autocmds
-autocmd BufEnter /tmp/todo.tmp nnoremap <Enter> :TodoOpen<CR>
-autocmd BufLeave /tmp/todo.tmp unmap <Enter>
+autocmd BufEnter /tmp/todo.tmp TodoBufEnter
+autocmd BufLeave /tmp/todo.tmp TodoBufLeave
 
-autocmd BufEnter /tmp/todo.tmp set cursorline
-autocmd BufLeave /tmp/todo.tmp set nocursorline
+autocmd BufWinEnter /tmp/todo.tmp TodoBufWinEnter
+autocmd BufWinLeave /tmp/todo.tmp TodoBufWinLeave
 
-autocmd BufEnter /tmp/todo.tmp execute 'resize ' . s:Todo_mini_size*3
-autocmd BufLeave /tmp/todo.tmp execute 'resize ' . s:Todo_mini_size
-
-autocmd BufWinEnter /tmp/todo.tmp let s:Todo_open = 1
-autocmd BufWinLeave /tmp/todo.tmp let s:Todo_open = 0
-
+autocmd CursorMoved /tmp/todo.tmp TodoCursorMoved
 " --------------
 
 " Plugin main
@@ -100,18 +102,71 @@ function s:CloseWindow()
 endfunction
 
 function s:TodoOpen()
-  " get array index, return if out of bounds
-  let l:arraypos = line(".") - 4
-  if l:arraypos < 0 && l:arraypos >= len(s:matches)
+  " find a match
+  let l:match = s:FindMatch()
+  if l:match == []
     return
   endif
-
-  " store the match
-  let l:match = s:matches[l:arraypos]
 
   " switch window up and go to that line
   wincmd k
   execute l:match[0]
-
 endfunction
 
+" finds a match from the matches list
+function s:FindMatch()
+  " get array index, return if out of bounds
+  let l:arraypos = line(".") - 4
+  if l:arraypos < 0 || l:arraypos >= len(s:matches)
+    return []
+  endif
+
+  " store the match
+  return s:matches[l:arraypos]
+endfunction
+
+" autocmd handlers
+"
+function s:TodoBufEnter()
+  if winnr() == 1
+    quit
+  endif
+
+  nnoremap <Enter> :wincmd k<CR>
+
+  set cursorline
+
+  execute 'resize ' . s:Todo_mini_size*3
+endfunction
+
+function s:TodoBufLeave()
+  unmap <Enter>
+
+  set nocursorline
+
+  wincmd k
+  set nocursorline
+  wincmd j
+
+  execute 'resize ' . s:Todo_mini_size
+endfunction
+
+function s:TodoBufWinEnter()
+  let s:Todo_open = 1
+endfunction
+
+function s:TodoBufWinLeave()
+  let s:Todo_open = 0
+endfunction
+
+function s:TodoCursorMoved()
+  let l:match = s:FindMatch()
+  if l:match == []
+    return
+  endif
+
+  wincmd k
+  execute l:match[0]
+  set cursorline
+  wincmd j
+endfunction
