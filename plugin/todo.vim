@@ -21,7 +21,7 @@ let s:Todo_open = 0
 let s:Todo_mini_size = 7
 
 " define commands
-command Todo call s:Todo()
+command Todo silent call s:Todo()
 
 " internal commands
 command TodoOpen call s:TodoOpen()
