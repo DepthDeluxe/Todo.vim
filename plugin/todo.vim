@@ -20,6 +20,8 @@ let s:matches = []
 let s:Todo_open = 0
 let s:Todo_mini_size = 7
 
+let s:regex = ''
+
 " define commands
 command Todo silent call s:Todo()
 
@@ -51,13 +53,29 @@ function s:Todo()
 
   " match upper case and lower case text
   let l:matches = []
-  g/\v([t|T][o|O][d|D][o|O]|[x|X]{3}|[f|F][i|I][x|X][m|M][e|E]):/let l:matches = matches + [[line("."), getline(line("."))]]
+  g/\v([t|T][o|O][d|D][o|O]|[x|X]{3}|[f|F][i|I][x|X][m|M][e|E]):/let l:matches = l:matches + [[line("."), join(split(getline("."), ":")[1:], ""), s:GetType(getline("."))]]
 
   let s:matches = l:matches
 
   call s:WriteToFile(@%, l:matches)
   call s:OpenWindow()
 
+endfunction
+
+function s:GetType(line)
+  let l:match = matchstr(a:line, "[t|T][o|O][d|D][o|O]")
+  if l:match != ""
+    return "TODO"
+  let l:match = matchstr(a:line, "[x|X]{3}")
+  if l:match != ""
+    return "XXX"
+  endif
+  let l:match = matchstr(a:line, "[f|F][i|I][x|X][m|M][e|E]")
+  if l:match != ""
+    return "FIXME"
+  endif
+
+  return ""
 endfunction
 
 " Opens a window with the file in read only mode
@@ -81,7 +99,7 @@ function s:WriteToFile(origname, matches)
 
   " write the TODOs
   for pair in a:matches
-    let l:line = pair[0].": ".pair[1]
+    let l:line = pair[0] . ", " . pair[2] . ": " . pair[1]
     put =l:line
   endfor
 
